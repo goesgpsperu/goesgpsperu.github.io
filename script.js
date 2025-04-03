@@ -109,6 +109,12 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
+        // Ordenar los vehículos online por nombre
+        onlineVehicles.sort((a, b) => a.unidad.localeCompare(b.unidad));
+        
+        // Ordenar los vehículos offline por nombre
+        offlineVehicles.sort((a, b) => a.unidad.localeCompare(b.unidad));
+
         // Procesar primero los vehículos online
         onlineVehicles.forEach(vehicle => {
             const posInicial = parseCoordinates(vehicle.posInicial);
@@ -122,19 +128,6 @@ document.addEventListener('DOMContentLoaded', function() {
             const posFinal = null;
             createDevice(vehicle.unidad, posInicial, posFinal, vehicle.popup);
         });
-
-        // Opcional: Agregar separadores visuales
-        if (onlineVehicles.length > 0 && offlineVehicles.length > 0) {
-            const devices = deviceList.querySelector('h2');
-            const separator = document.createElement('div');
-            separator.className = 'device-separator';
-            separator.innerHTML = `
-                <span class="separator-text">Dispositivos sin ubicación</span>
-            `;
-            // Insertar el separador después del último dispositivo online
-            const onlineDevices = document.querySelectorAll('.device');
-            onlineDevices[onlineVehicles.length - 1].after(separator);
-        }
     }
 
     // Función para parsear coordenadas "lat,lng"
@@ -186,89 +179,27 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Función para mover un marcador hacia su destino
     function moveMarkerToDestination(marker, start, end, deviceName, popupText) {
-        const steps = 1000;
-        const stepDelay = 3000; // Reducido a 3 segundos entre pasos
+        const steps = 300; // Mantener 300 pasos
+        const stepDelay = 5000; // Mantener 5 segundos entre cada paso
         let currentStep = 0;
-        let routePoints = [];
 
-        // Obtener la ruta usando OSRM con preferencia por calles principales
-        fetch(`https://router.project-osrm.org/route/v1/driving/${start.lng},${start.lat};${end.lng},${end.lat}?overview=full&geometries=geojson&alternatives=false&continue_straight=true&preference=fastest`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.routes && data.routes[0]) {
-                    routePoints = data.routes[0].geometry.coordinates.map(coord => ({
-                        lng: coord[0],
-                        lat: coord[1]
-                    }));
-                    
-                    // Dibujar la ruta en el mapa
-                    const routeLine = L.polyline(routePoints.map(p => [p.lat, p.lng]), {
-                        color: '#ff7f50',
-                        opacity: 0.6,
-                        weight: 3,
-                        smoothFactor: 1
-                    }).addTo(map);
-
-                    function step() {
-                        if (currentStep >= steps) {
-                            routeLine.remove(); // Limpiar la línea cuando termina
-                            return;
-                        }
-                        
-                        currentStep++;
-                        const progress = currentStep / steps;
-                        
-                        // Encontrar el punto más cercano en la ruta
-                        const routeIndex = Math.floor(progress * (routePoints.length - 1));
-                        const currentPos = routePoints[routeIndex];
-                        
-                        // Calcular la rotación del marcador basado en la dirección del movimiento
-                        if (routeIndex < routePoints.length - 1) {
-                            const nextPos = routePoints[routeIndex + 1];
-                            const angle = Math.atan2(nextPos.lat - currentPos.lat, nextPos.lng - currentPos.lng) * 180 / Math.PI;
-                            marker.setRotationAngle(angle + 90);
-                        }
-                        
-                        marker.setLatLng([currentPos.lat, currentPos.lng]);
-                        marker.bindPopup(createCustomPopup(deviceName, popupText, currentPos));
-                        
-                        setTimeout(() => step(), stepDelay);
-                    }
-
-                    step();
-                }
-            })
-            .catch(error => {
-                console.error('Error obteniendo la ruta:', error);
-                // Fallback mejorado
-                const directLine = L.polyline([[start.lat, start.lng], [end.lat, end.lng]], {
-                    color: '#ff7f50',
-                    opacity: 0.6,
-                    weight: 3,
-                    dashArray: '10, 10' // Línea punteada para indicar ruta directa
-                }).addTo(map);
-
-                function fallbackStep() {
-                    if (currentStep >= steps) {
-                        directLine.remove();
-                        return;
-                    }
-                    
-                    currentStep++;
-                    const progress = currentStep / steps;
-                    
-                    const newLat = start.lat + (end.lat - start.lat) * progress;
-                    const newLng = start.lng + (end.lng - start.lng) * progress;
-                    const currentPos = { lat: newLat, lng: newLng };
-                    
-                    marker.setLatLng([newLat, newLng]);
-                    marker.bindPopup(createCustomPopup(deviceName, popupText, currentPos));
-                    
-                    setTimeout(() => fallbackStep(), stepDelay);
-                }
-                
-                fallbackStep();
-            });
+        function step() {
+            if (currentStep >= steps) return;
+            
+            currentStep++;
+            const progress = currentStep / steps;
+            
+            const newLat = start.lat + (end.lat - start.lat) * progress;
+            const newLng = start.lng + (end.lng - start.lng) * progress;
+            const currentPos = { lat: newLat, lng: newLng };
+            
+            marker.setLatLng([newLat, newLng]);
+            marker.bindPopup(createCustomPopup(deviceName, popupText, currentPos));
+            
+            setTimeout(() => step(), stepDelay);
+        }
+        
+        step();
     }
 
     // Función para crear dispositivo

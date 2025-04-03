@@ -384,4 +384,28 @@ iframe {
 
 .device-list::-webkit-scrollbar-thumb:hover {
     background: #ff6b3d;
+}
+
+.device-separator {
+    margin: 20px 0;
+    text-align: center;
+    position: relative;
+}
+
+.device-separator::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    width: 100%;
+    height: 1px;
+    background: rgba(0,0,0,0.1);
+}
+
+.separator-text {
+    background: white;
+    padding: 0 10px;
+    color: #666;
+    font-size: 12px;
+    position: relative;
 } 

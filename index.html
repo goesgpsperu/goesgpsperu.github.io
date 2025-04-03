@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Monitoreo GPS</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Agregar Leaflet CSS y JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <button id="toggleSidebar" class="toggle-sidebar">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="logo">
+                <img src="https://i.postimg.cc/g2WCFxY0/logo-goes-actual.png" alt="GOES Logo">
+                <h1>GOES GPS SYSTEM</h1>
+            </div>
+            <div class="device-list">
+                <h2>Dispositivos</h2>
+                <div class="device">
+                    <i class="fas fa-car"></i>
+                    <span>Dispositivo 1</span>
+                    <span class="status online"></span>
+                </div>
+                <div class="device">
+                    <i class="fas fa-car"></i>
+                    <span>Dispositivo 2</span>
+                    <span class="status offline"></span>
+                </div>
+                <!-- Aquí se agregarán más dispositivos dinámicamente -->
+            </div>
+            <div class="controls">
+                <button id="refreshMap">
+                    <i class="fas fa-sync"></i> Actualizar Datos
+                </button>
+            </div>
+        </div>
+        <div class="map-container">
+            <div id="map"></div>
+        </div>
+    </div>
+    <div id="passwordModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Acceso Requerido</h3>
+                <span class="close-modal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p>Ingrese la contraseña para continuar:</p>
+                <input type="password" id="passwordInput" placeholder="Contraseña">
+                <button id="submitPassword">
+                    <i class="fas fa-lock"></i>
+                    Acceder
+                </button>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html> 
